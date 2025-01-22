@@ -14,13 +14,13 @@ def get_data():
     train_idx = data.iloc[:train_data.shape[0]].index
     test_idx = data.iloc[train_data.shape[0]:].index
 
-    return data, train_idx, test_idx
+    return train_data, test_data
 
-def data_processing(df, group_cols, train_idx):
+def data_processing(df, group_cols):
 
     df = create_time_features(df)
-    df = imputation(df, group_cols, train_idx)
-    df = generate_lag_features_by_group(df, group_cols)
+    df = imputation(df, group_cols)
+    # df = generate_lag_features_by_group(df, group_cols)
 
     df = df.drop('date', axis=1)
     df = encoding(df)
@@ -29,15 +29,16 @@ def data_processing(df, group_cols, train_idx):
 
 def main():
 
-    df, train_idx, test_idx = get_data()
+    df_train, df_test = get_data()
 
     
-    group_cols = ['country','store','product', 'month']
-    df = data_processing(df, group_cols, train_idx)
+    group_cols = ['country','store','product']
+    df_train = data_processing(df_train, group_cols)
+
     # df_test = data_processing(df_test, group_cols, type='test')
 
-    df_train = df[df.index.isin(train_idx)]
-    df_test = df[df.index.isin(test_idx)].drop(['num_sold'], axis=1)
+    # df_train = df[df.index.isin(train_idx)]
+    # df_test = df[df.index.isin(test_idx)].drop(['num_sold'], axis=1)
     scaler_train, X_train_scaled, X_valid_scaled, scaler_target, y_train_scaled, y_valid_scaled = split_and_standardization(df_train, target_col='num_sold', test_size=0.2)
 
     predictor = Predictor(X_train_scaled, X_valid_scaled, y_train_scaled, y_valid_scaled)
@@ -46,20 +47,22 @@ def main():
     mape = predictor.train_and_eval()
     # mse, y_pred = prediction(X_train_scaled, X_valid_scaled, y_train_scaled, y_valid_scaled)
 
-    print(f"MAPE: {mape: .2f}")
+    print(f"MAPE: {mape: .5f}")
 
-    df_test_scaled = scaler_train.transform(df_test)    
+    # df_test_scaled = scaler_train.transform(df_test)    
 
-    y_test_pred = predictor.predict_on_test(df_test_scaled)
+    # y_test_pred = predictor.predict_on_test(df_test_scaled)
 
-    y_test_pred_revert = np.floor(scaler_target.inverse_transform(y_test_pred.reshape(-1, 1)))
+    # y_test_pred_revert = np.floor(scaler_target.inverse_transform(y_test_pred.reshape(-1, 1)))
 
-    sumbmission = pd.DataFrame({
-        'id': df_test.index,
-        'num_sold': y_test_pred_revert.flatten()
-    })
+    # sumbmission = pd.DataFrame({
+    #     'id': df_test.index,
+    #     'num_sold': y_test_pred_revert.flatten()
+    # })
 
-    sumbmission.to_csv('submission.csv', index=False)
+    # sumbmission.to_csv('submission.csv', index=False)
+
+    print(1)
 
 if __name__ == '__main__':
     main()

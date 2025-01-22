@@ -40,7 +40,7 @@ class Predictor:
 
         return XGBRFRegressor(
             n_estimators=120,        # Number of trees
-            max_depth=15,             # Maximum depth of each tree
+            max_depth=5,             # Maximum depth of each tree
             learning_rate=0.01,       # Learning rate (shrinkage factor)
             subsample=0.8,           # Subsample ratio for training instances
             colsample_bynode=0.8,    # Subsample ratio for columns at each tree node

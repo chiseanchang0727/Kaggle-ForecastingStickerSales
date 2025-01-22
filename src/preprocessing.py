@@ -9,8 +9,8 @@ def create_sinusoidal_transformation_year_month_day(df, col_name, year, month, d
     """
     Adds sinusoidal transformation columns (sin and cos) for year, month, day.
     """
-    df[f'{col_name}_sin'] = np.sin(2 * np.pi * df[year] * df[month] * df[day] / period)
-    df[f'{col_name}_cos'] = np.cos(2 * np.pi * df[year] * df[month] * df[day] / period)
+    # df[f'{col_name}_sin'] = np.sin(2 * np.pi * df[year] * df[month] * df[day] / period)
+    # df[f'{col_name}_cos'] = np.cos(2 * np.pi * df[year] * df[month] * df[day] / period)
 
     df['day_sin'] = np.sin(2 * np.pi * df['day'] / 365)
     df['day_cos'] = np.cos(2 * np.pi * df['day'] / 365)
@@ -23,35 +23,38 @@ def create_sinusoidal_transformation_year_month_day(df, col_name, year, month, d
 
 def create_time_features(df: pd.DataFrame, date_col='date'):
     df[date_col] = pd.to_datetime(df[date_col])
-    df = df.sort_values(date_col).reset_index(drop=True)
+    # df = df.sort_values(date_col).reset_index(drop=True)
 
     # Time-based features
     df['year'] = df[date_col].dt.year
     df['month'] = df[date_col].dt.month
     df['day'] = df[date_col].dt.day
     df['dayofWeek'] = df[date_col].dt.dayofweek
+    # df['weekend'] = np.where(df['dayofWeek']>5, 1, 0)
 
-    for country in df.country.unique():
-        holiday_cal = holidays.CountryHoliday(country=country)
-        df[f'{country}_holiday'] = df[date_col].apply(lambda x: x in holiday_cal).astype(int)
+    # for country in df.country.unique():
+    #     holiday_cal = holidays.CountryHoliday(country=country)
+    #     df[f'{country}_holiday'] = df[date_col].apply(lambda x: x in holiday_cal).astype(int)
 
-    df = create_sinusoidal_transformation_year_month_day(df, 'date', "year", "month", "day", 12)
+    # df = create_sinusoidal_transformation_year_month_day(df, 'date', "year", "month", "day", 12)
 
     return df
 
 
-def imputation(df: pd.DataFrame, group_by: list, train_idx):
+def imputation(df: pd.DataFrame, group_by: list):
 
 
-    df.loc[df.index.isin(train_idx), 'num_sold'] = df.loc[df.index.isin(train_idx), 'num_sold'].fillna(0)
-    df_temp = df.groupby(group_by)['num_sold'].mean().reset_index(name='avg_sold').round(0)
-    df_merge = pd.merge(df, df_temp, how='left', on=group_by)
-    df_merge['num_sold'] = np.where(df_merge['num_sold'].isna(), df_merge['avg_sold'], df_merge['num_sold'])
+    # df.loc[df.index.isin(train_idx), 'num_sold'] = df.loc[df.index.isin(train_idx), 'num_sold'].fillna(0)
 
-    df_merge['num_sold'] = np.log1p(df_merge['num_sold'])
+    df['num_sold'] = df['num_sold'].fillna(df['num_sold'].mean())
 
-    return df_merge
+    # df_temp = df.groupby(group_by)['num_sold'].mean().reset_index(name='avg_sold').round(0)
+    # df_merge = pd.merge(df, df_temp, how='left', on=group_by)
+    # df_merge['num_sold'] = np.where(df_merge['num_sold'].isna(), df_merge['avg_sold'], df_merge['num_sold'])
 
+    # df_merge['num_sold'] = np.log1p(df_merge['num_sold'])
+
+    return df
 
 
 def encoding(df: pd.DataFrame):
@@ -60,16 +63,6 @@ def encoding(df: pd.DataFrame):
     df_encoded = pd.get_dummies(df, columns=categorical_col, drop_first=False, dtype=int)
 
     return df_encoded
-
-def standardization(X_train, X_valid):
-
-    scaler = StandardScaler()
-    
-    # Fit the scaler on training data and transform both training and validation data
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_valid_scaled = scaler.transform(X_valid)
-    
-    return scaler, X_train_scaled, X_valid_scaled
 
 
 def data_splitting(df, target_col, test_size=0.2):
