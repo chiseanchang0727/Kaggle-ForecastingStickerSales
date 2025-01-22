@@ -46,7 +46,7 @@ def imputation(df: pd.DataFrame, group_by: list):
 
     # df.loc[df.index.isin(train_idx), 'num_sold'] = df.loc[df.index.isin(train_idx), 'num_sold'].fillna(0)
 
-    df['num_sold'] = df['num_sold'].fillna(df['num_sold'].median())
+    df['num_sold'] = df['num_sold'].fillna(df['num_sold'].mean())
 
     # df_temp = df.groupby(group_by)['num_sold'].mean().reset_index(name='avg_sold').round(0)
     # df_merge = pd.merge(df, df_temp, how='left', on=group_by)
