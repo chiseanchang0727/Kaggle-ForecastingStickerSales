@@ -16,10 +16,10 @@ def get_data():
 
     return data, train_idx, test_idx
 
-def data_processing(df, group_cols):
+def data_processing(df, group_cols, train_idx):
 
     df = create_time_features(df)
-    df = imputation(df, group_cols)
+    df = imputation(df, group_cols, train_idx)
     df = generate_lag_features_by_group(df, group_cols)
 
     df = df.drop('date', axis=1)
@@ -33,7 +33,7 @@ def main():
 
     
     group_cols = ['country','store','product', 'month']
-    df = data_processing(df, group_cols)
+    df = data_processing(df, group_cols, train_idx)
     # df_test = data_processing(df_test, group_cols, type='test')
 
     df_train = df[df.index.isin(train_idx)]

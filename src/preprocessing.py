@@ -40,13 +40,15 @@ def create_time_features(df: pd.DataFrame, date_col='date'):
     return df
 
 
-def imputation(df: pd.DataFrame, group_by: list):
+def imputation(df: pd.DataFrame, group_by: list, train_idx):
 
 
-    df['num_sold'] = df['num_sold'].fillna(0)
+    df.loc[df.index.isin(train_idx), 'num_sold'] = df.loc[df.index.isin(train_idx), 'num_sold'].fillna(0)
     df_temp = df.groupby(group_by)['num_sold'].mean().reset_index(name='avg_sold').round(0)
     df_merge = pd.merge(df, df_temp, how='left', on=group_by)
     df_merge['num_sold'] = np.where(df_merge['num_sold'].isna(), df_merge['avg_sold'], df_merge['num_sold'])
+
+    df_merge['num_sold'] = np.log1p(df_merge['num_sold'])
 
     return df_merge
 
