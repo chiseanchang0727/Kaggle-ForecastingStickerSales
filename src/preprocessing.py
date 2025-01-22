@@ -23,7 +23,7 @@ def create_sinusoidal_transformation_year_month_day(df, col_name, year, month, d
 
 def create_time_features(df: pd.DataFrame, date_col='date'):
     df[date_col] = pd.to_datetime(df[date_col])
-    df = df.sort_values(date_col).reset_index(drop=True)
+    # df = df.sort_values(date_col).reset_index(drop=True)
 
     # Time-based features
     df['year'] = df[date_col].dt.year

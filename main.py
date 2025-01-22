@@ -18,7 +18,7 @@ def get_data():
 
 def data_processing(df, group_cols):
 
-    # df = create_time_features(df)
+    df = create_time_features(df)
     df = imputation(df, group_cols)
     # df = generate_lag_features_by_group(df, group_cols)
 
