@@ -9,8 +9,8 @@ def create_sinusoidal_transformation_year_month_day(df, col_name, year, month, d
     """
     Adds sinusoidal transformation columns (sin and cos) for year, month, day.
     """
-    # df[f'{col_name}_sin'] = np.sin(2 * np.pi * df[year] * df[month] * df[day] / period)
-    # df[f'{col_name}_cos'] = np.cos(2 * np.pi * df[year] * df[month] * df[day] / period)
+    df[f'{col_name}_sin'] = np.sin(2 * np.pi * df[year] * df[month] * df[day] / period)
+    df[f'{col_name}_cos'] = np.cos(2 * np.pi * df[year] * df[month] * df[day] / period)
 
     df['day_sin'] = np.sin(2 * np.pi * df['day'] / 365)
     df['day_cos'] = np.cos(2 * np.pi * df['day'] / 365)
@@ -35,7 +35,7 @@ def create_time_features(df: pd.DataFrame, date_col='date'):
     #     holiday_cal = holidays.CountryHoliday(country=country)
     #     df[f'{country}_holiday'] = df[date_col].apply(lambda x: x in holiday_cal).astype(int)
 
-    # df = create_sinusoidal_transformation_year_month_day(df, 'date', "year", "month", "day", 12)
+    df = create_sinusoidal_transformation_year_month_day(df, 'date', "year", "month", "day", 12)
 
     return df
 
