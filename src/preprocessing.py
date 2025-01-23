@@ -6,11 +6,9 @@ from sklearn.model_selection import train_test_split
 import holidays
 
 def create_sinusoidal_transformation_year_month_day(df, col_name, year, month, day, period):
-    """
-    Adds sinusoidal transformation columns (sin and cos) for year, month, day.
-    """
-    df[f'{col_name}_sin'] = np.sin(2 * np.pi * df[year] * df[month] * df[day] / period)
-    df[f'{col_name}_cos'] = np.cos(2 * np.pi * df[year] * df[month] * df[day] / period)
+
+    # df[f'{col_name}_sin'] = np.sin(2 * np.pi * df[year] * df[month] * df[day] / period)
+    # df[f'{col_name}_cos'] = np.cos(2 * np.pi * df[year] * df[month] * df[day] / period)
 
     df['day_sin'] = np.sin(2 * np.pi * df['day'] / 365)
     df['day_cos'] = np.cos(2 * np.pi * df['day'] / 365)
@@ -30,12 +28,15 @@ def create_time_features(df: pd.DataFrame, date_col='date'):
     df['day'] = df[date_col].dt.day
     df['dayofWeek'] = df[date_col].dt.dayofweek
     df['weekend'] = np.where(df['dayofWeek']>5, 1, 0)
+    df['week_of_year'] = df[date_col].dt.isocalendar().week.astype('int')
 
-    for country in df.country.unique():
-        holiday_cal = holidays.CountryHoliday(country=country)
-        df[f'{country}_holiday'] = df[date_col].apply(lambda x: x in holiday_cal).astype(int)
+    # for country in df.country.unique():
+    #     holiday_cal = holidays.CountryHoliday(country=country)
+    #     df[f'{country}_holiday'] = df[date_col].apply(lambda x: x in holiday_cal).astype(int)
 
     df = create_sinusoidal_transformation_year_month_day(df, 'date', "year", "month", "day", 12)
+    
+    df['group'] = (df['year'] - 2010) * 48 + df['month'] * 4 + df['day'] // 7
 
     return df
 
@@ -45,16 +46,27 @@ def imputation(df: pd.DataFrame, group_by: list):
 
     # df.loc[df.index.isin(train_idx), 'num_sold'] = df.loc[df.index.isin(train_idx), 'num_sold'].fillna(0)
 
-    df['num_sold'] = df['num_sold'].fillna(df['num_sold'].mean())
+    # df['num_sold'] = df['num_sold'].fillna(df['num_sold'].mean())
+    
+    df = df.dropna()
 
     # df_temp = df.groupby(group_by)['num_sold'].mean().reset_index(name='avg_sold').round(0)
     # df_merge = pd.merge(df, df_temp, how='left', on=group_by)
     # df_merge['num_sold'] = np.where(df_merge['num_sold'].isna(), df_merge['avg_sold'], df_merge['num_sold'])
 
-    df['num_sold'] = np.log1p(df['num_sold'])
+
 
     return df
 
+def target_transformation(df, target='num_sold'):
+    
+    df[target] = np.log1p(df[target])
+
+    return df
+
+def reverse_target_transformation(input):
+    reversed_input = np.expm1(input) 
+    return reversed_input
 
 def encoding(df: pd.DataFrame):
 
@@ -85,5 +97,5 @@ def split_and_standardization(df, target_col, test_size):
     # y_train_scaled = scaler_target.fit_transform(pd.DataFrame(y_train))
     # y_valid_scaled = scaler_target.transform(pd.DataFrame(y_valid))
 
-    return scaler_train, X_train_scaled, X_valid_scaled, scaler_target, y_train, y_valid
+    return scaler_train, X_train, X_valid, scaler_target, y_train, y_valid
 
