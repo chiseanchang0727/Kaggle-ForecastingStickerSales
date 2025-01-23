@@ -23,20 +23,19 @@ def create_sinusoidal_transformation_year_month_day(df, col_name, year, month, d
 
 def create_time_features(df: pd.DataFrame, date_col='date'):
     df[date_col] = pd.to_datetime(df[date_col])
-    # df = df.sort_values(date_col).reset_index(drop=True)
 
     # Time-based features
     df['year'] = df[date_col].dt.year
     df['month'] = df[date_col].dt.month
     df['day'] = df[date_col].dt.day
     df['dayofWeek'] = df[date_col].dt.dayofweek
-    # df['weekend'] = np.where(df['dayofWeek']>5, 1, 0)
+    df['weekend'] = np.where(df['dayofWeek']>5, 1, 0)
 
-    # for country in df.country.unique():
-    #     holiday_cal = holidays.CountryHoliday(country=country)
-    #     df[f'{country}_holiday'] = df[date_col].apply(lambda x: x in holiday_cal).astype(int)
+    for country in df.country.unique():
+        holiday_cal = holidays.CountryHoliday(country=country)
+        df[f'{country}_holiday'] = df[date_col].apply(lambda x: x in holiday_cal).astype(int)
 
-    # df = create_sinusoidal_transformation_year_month_day(df, 'date', "year", "month", "day", 12)
+    df = create_sinusoidal_transformation_year_month_day(df, 'date', "year", "month", "day", 12)
 
     return df
 
@@ -52,7 +51,7 @@ def imputation(df: pd.DataFrame, group_by: list):
     # df_merge = pd.merge(df, df_temp, how='left', on=group_by)
     # df_merge['num_sold'] = np.where(df_merge['num_sold'].isna(), df_merge['avg_sold'], df_merge['num_sold'])
 
-    # df_merge['num_sold'] = np.log1p(df_merge['num_sold'])
+    df['num_sold'] = np.log1p(df['num_sold'])
 
     return df
 
@@ -83,8 +82,8 @@ def split_and_standardization(df, target_col, test_size):
     X_valid_scaled = scaler_train.transform(X_valid)
 
     scaler_target = StandardScaler()
-    y_train_scaled = scaler_target.fit_transform(pd.DataFrame(y_train))
-    y_valid_scaled = scaler_target.transform(pd.DataFrame(y_valid))
+    # y_train_scaled = scaler_target.fit_transform(pd.DataFrame(y_train))
+    # y_valid_scaled = scaler_target.transform(pd.DataFrame(y_valid))
 
-    return scaler_train, X_train_scaled, X_valid_scaled, scaler_target, y_train_scaled, y_valid_scaled
+    return scaler_train, X_train_scaled, X_valid_scaled, scaler_target, y_train, y_valid
 

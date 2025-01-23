@@ -39,9 +39,9 @@ def main():
 
     # df_train = df[df.index.isin(train_idx)]
     # df_test = df[df.index.isin(test_idx)].drop(['num_sold'], axis=1)
-    scaler_train, X_train_scaled, X_valid_scaled, scaler_target, y_train_scaled, y_valid_scaled = split_and_standardization(df_train, target_col='num_sold', test_size=0.2)
+    scaler_train, X_train_scaled, X_valid_scaled, scaler_target, y_train, y_valid = split_and_standardization(df_train, target_col='num_sold', test_size=0.2)
 
-    predictor = Predictor(X_train_scaled, X_valid_scaled, y_train_scaled, y_valid_scaled)
+    predictor = Predictor(X_train_scaled, X_valid_scaled, y_train, y_valid)
 
     
     mape = predictor.train_and_eval()
@@ -62,7 +62,7 @@ def main():
 
     # sumbmission.to_csv('submission.csv', index=False)
 
-    print(1)
+    print('Done.')
 
 if __name__ == '__main__':
     main()
