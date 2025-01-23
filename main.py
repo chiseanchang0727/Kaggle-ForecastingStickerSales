@@ -49,7 +49,9 @@ def main():
     group_cols = ['country','store','product']
     df_train = data_transformation(df_train, group_cols, mode='train')
     df_test = data_transformation(df_test, group_cols, mode='test')
-
+    
+    df_train.to_csv('train_check.csv', index=False)
+    df_test.to_csv('test_check.csv', index=False)
     # df_test = data_processing(df_test, group_cols, type='test')
 
     # df_train = df[df.index.isin(train_idx)]
@@ -70,7 +72,7 @@ def main():
     
     loaded_model = load_model('stacking_model.pkl')
 
-    # Make predictions
+    # Make predictions0
     predictions = loaded_model.predict(df_test)
 
     predictions_revesed = reverse_target_transformation(predictions)
